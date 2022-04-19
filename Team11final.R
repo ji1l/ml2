@@ -9,20 +9,21 @@ library(randomForest)
 library(e1071)
 library(gbm)
 
-#visualizing the data 
-#df <- train 
-#barplot(sort(table(df$Type)), main = "City Type")
-#barplot(sort(table(df$City)), main = "Restaurant Numbers", cex.names = 0.5)
-
 #setup data 
 train <- read.csv("train.csv")
 test  <- read.csv("test.csv")
+
+#visualizing the data 
+df <- train 
+barplot(sort(table(df$Type)), main = "Restaurant Type")
+barplot(sort(table(df$City)), main = "Restaurant Numbers", cex.names = 0.5)
 
 n.train <- nrow(train)
 test$revenue <- 0
 train$revenue <- log(train$revenue) #if you visualize the revenue variable - it is highly skewed - take the log to normalize
 data <- rbind(train, test)
 data <-data[,-c(1,3)]
+
 
 #convert date to num days
 today<-Sys.Date()
@@ -72,8 +73,8 @@ for(j in 1:3){
 map_rf <- apply(rmse_rf,2,mean)
 map_rf 
 
-#the model we will choose is the one with the smalled rmse value
-which.min(map_rf) # ntree  = 6000 opt
+#the model we will choose is the one with the smallest rmse value
+which.min(map_rf) # ntree  = 6000 opt (sometimes prints 9000 when rmse is the same beween 6000 and 9000 - most likely due to small training size)
 
 rf_model_best <- randomForest(data=train,revenue~.,ntree = 6000,importance = T)
 importance(rf_model_best)
@@ -122,7 +123,7 @@ for (j in 1:3) {
 #print rmses
 map_boost <- apply(rmse_boost,2,mean)
 map_boost
-which.min(map_boost) #ntree = 6000
+which.min(map_boost) #ntree = 6000 (also sometimes 9000...for same reason as RF)
 
 #creating best model 
 boost_model_best <- gbm(revenue~.,
